@@ -1,10 +1,10 @@
-import { useState, useContext, useEffect, type ChangeEvent, type FormEvent } from "react";
+import { useContext, useEffect, useState, type ChangeEvent, type FormEvent } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { ClipLoader } from "react-spinners";
 import { AuthContext } from "../../../contexts/AuthContext";
 import type Postagem from "../../../models/Postagem";
 import type Tema from "../../../models/Tema";
-import { buscar, atualizar, cadastrar } from "../../../services/Service";
-import { ClipLoader } from "react-spinners";
+import { atualizar, buscar, cadastrar } from "../../../services/Service";
 
 function FormPostagem() {
   const navigate = useNavigate();
@@ -77,6 +77,12 @@ function FormPostagem() {
       tema: tema,
     })
   }, [tema])
+
+  useEffect(() => {
+    if (id !== undefined && postagem.tema && tema.id === 0) {
+      setTema(postagem.tema)
+    }
+  }, [postagem.tema])
 
   function atualizarEstado(e: ChangeEvent<HTMLInputElement>) {
     setPostagem({
@@ -175,6 +181,7 @@ function FormPostagem() {
             name="tema"
             id="tema"
             className='border p-2 border-slate-800 rounded'
+             value={tema.id}
             onChange={(e) => buscarTemaPorId(e.currentTarget.value)}
           >
             <option value="" selected disabled>Selecione um Tema</option>
