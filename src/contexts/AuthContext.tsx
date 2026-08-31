@@ -1,6 +1,6 @@
-import { createContext, useState, type ReactNode } from "react";
-import type UsuarioLogin from "../models/UsuarioLogin";
 import axios from "axios";
+import { createContext, useRef, useState, type ReactNode } from "react";
+import type UsuarioLogin from "../models/UsuarioLogin";
 import { login } from "../services/Service";
 import { ToastAlerta } from "../utils/ToastAlerta";
 
@@ -10,6 +10,7 @@ interface AuthContextProps {
     handleLogin(usuario: UsuarioLogin): void
     handleLogout(): void
     isLoading: boolean
+    isLogout: boolean
 
 }
 
@@ -39,6 +40,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
     // Inicializar o estado isLoading
     const [isLoading, setIsLoading] = useState<boolean>(false);
 
+    const isLogout = useRef(false)
+
     // Implementar a função handleLogin
     async function handleLogin(usuarioLogin: UsuarioLogin) {
 
@@ -47,6 +50,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
         try {
             await login(`/usuarios/logar`, usuarioLogin, setUsuario)
             ToastAlerta("Usuário Autenticado com sucesso!", "sucesso")
+
+            isLogout.current = false
+
         } catch (error) {
             if (axios.isAxiosError(error)) {
                 ToastAlerta(`Erro ao autenticar o usuário (${error.response?.status})`, "erro")
@@ -59,6 +65,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
     // Implementar a função handleLogout (desconectar o Usuario)
     function handleLogout() {
+
+        isLogout.current = true
+
         setUsuario({
             id: 0,
             nome: '',
@@ -68,9 +77,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
             token: '',
         })
 
+        ToastAlerta('Usuario desconectado com sucesso!', 'sucesso');
+
     }
     return (
-        <AuthContext.Provider value={{ usuario, handleLogin, handleLogout, isLoading }}>
+        <AuthContext.Provider value={{ usuario, handleLogin, handleLogout, isLoading, isLogout: isLogout.current }}>
             {children}
         </AuthContext.Provider>
     )
