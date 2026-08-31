@@ -5,6 +5,7 @@ import type Tema from "../../../models/Tema";
 import { atualizar, buscar, cadastrar } from "../../../services/Service";
 import axios from "axios";
 import { ClipLoader } from "react-spinners";
+import { ToastAlerta } from "../../../utils/ToastAlerta";
 
 function FormTema() {
 
@@ -27,19 +28,22 @@ function FormTema() {
 
     // Função responsável por buscar um tema pelo ID no Backend (API)
     async function buscarTemaPorId() {
-
         setIsLoading(true);
 
         try {
-
             await buscar(`/temas/${id}`, setTema, {
                 headers: { Authorization: token }
-            })
-
+            });
         } catch (error) {
-            if (axios.isAxiosError(error) && error.response?.status === 401) {
-                alert(`Erro ao consultar o tema: ${error.response.status}`);
-                handleLogout();
+            if (axios.isAxiosError(error)) {
+                ToastAlerta(
+                    `Erro ao consultar o tema: ${error.response?.status}`,
+                    'erro'
+                );
+
+                if (error.response?.status === 401) {
+                    handleLogout();
+                }
             }
         } finally {
             setIsLoading(false);
@@ -57,7 +61,7 @@ function FormTema() {
     // useEffect para monitorar o token
     useEffect(() => {
         if (token === '') {
-            alert("Você precisa estar logado!");
+            ToastAlerta("Você precisa estar logado!", 'info');
             navigate('/');
         }
     }, [token])
@@ -85,10 +89,10 @@ function FormTema() {
                 await atualizar(`/temas`, tema, setTema, {
                     headers: { Authorization: token }
                 });
-                alert("Tema atualizado com sucesso!");
+                ToastAlerta("Tema atualizado com sucesso!", 'sucesso');
             } catch (error) {
                 if (axios.isAxiosError(error)) {
-                    alert(`Erro ao atualizar o tema: ${error.response?.status}`);
+                    ToastAlerta(`Erro ao atualizar o tema: ${error.response?.status}`, 'erro');
                     if (error.response?.status === 401) {
                         handleLogout();
                     }
@@ -105,10 +109,10 @@ function FormTema() {
                 await cadastrar(`/temas`, tema, setTema, {
                     headers: { Authorization: token }
                 });
-                alert("Tema cadastrado com sucesso!");
+                ToastAlerta("Tema cadastrado com sucesso!", 'sucesso');
             } catch (error) {
                 if (axios.isAxiosError(error)) {
-                    alert(`Erro ao cadastrar o tema: ${error.response?.status}`);
+                    ToastAlerta(`Erro ao cadastrar o tema: ${error.response?.status}`, 'erro');
                     if (error.response?.status === 401) {
                         handleLogout();
                     }
